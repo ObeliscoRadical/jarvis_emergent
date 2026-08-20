@@ -1,0 +1,92 @@
+{
+  "theme": "Arc Reactor CEO HUD (Cinematic)",
+  "emotional_archetype": "Electric & Neon (Hyper-Intelligence & Authority)",
+  "typography": {
+    "primary_heading": "Rajdhani, sans-serif",
+    "secondary_body": "Rajdhani, sans-serif",
+    "data_monospace": "JetBrains Mono, monospace",
+    "rules": {
+      "headings": "Uppercase only. Use tracking-widest (e.g., tracking-[0.2em]) to emulate tech displays.",
+      "data_readouts": "Use JetBrains Mono at tiny scales (text-[10px] to text-xs) for logs, timestamps, and coordinates.",
+      "forbidden_fonts": ["Inter", "Roboto", "Space Grotesk", "Open Sans"],
+      "hierarchy": "H1: text-5xl tracking-[0.3em], H2: text-2xl tracking-[0.2em] text-cyan-400, Body: text-sm text-cyan-50/70"
+    }
+  },
+  "colors": {
+    "background": {
+      "void_black": "#010308",
+      "hud_panel": "rgba(0, 240, 255, 0.03)",
+      "hud_glass": "rgba(1, 3, 8, 0.85)"
+    },
+    "primary": {
+      "cyan_core": "#00F0FF",
+      "cyan_glow": "rgba(0, 240, 255, 0.5)",
+      "cyan_dim": "rgba(0, 240, 255, 0.15)"
+    },
+    "accent": {
+      "amber_warning": "#FFB000",
+      "amber_glow": "rgba(255, 176, 0, 0.5)"
+    },
+    "text": {
+      "high_contrast": "#FFFFFF",
+      "standard": "#A5F3FC",
+      "muted": "#164E63"
+    },
+    "rules": "No pure white backgrounds. Everything is deep black with glowing cyan structural lines and amber highlights."
+  },
+  "visual_enhancers": {
+    "scanlines": "MANDATORY: Add a fixed full-screen overlay with pointer-events-none: bg-[linear-gradient(rgba(0,0,0,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px].",
+    "vignette": "MANDATORY: Radial gradient shadow from edges to center to increase cinematic depth.",
+    "glows": "Use drop-shadow-[0_0_12px_rgba(0,240,255,0.6)] for active elements, reactors, and critical text.",
+    "hud_brackets": "Do not use standard border-radius cards. Containers must use L-bracket corners (border-t-2 border-l-2 border-cyan-500/50 w-4 h-4 absolute top-0 left-0, etc.) to look like camera viewfinders.",
+    "grids": "Subtle background grid overlay: bg-[linear-gradient(to_right,#00F0FF0A_1px,transparent_1px),linear-gradient(to_bottom,#00F0FF0A_1px,transparent_1px)] bg-[size:4rem_4rem]."
+  },
+  "layouts": {
+    "structure": "Symmetrical Command Deck. 100vw 100vh overflow-hidden absolute positioning.",
+    "center_stage": "Giant Circular Arc Reactor. Houses the voice visualizer, AI state, and central node. Must dominate the middle 40% of the screen.",
+    "left_rail": "Dense technical readouts. System diagnostics, real-time memory logs (scrolling monospace text), and mini-radar/Second Brain overview.",
+    "right_rail": "Command Stream. Current active notes, chat inputs (styled as terminal commands), and actionable Amber buttons.",
+    "density": "HIGH. Fill empty spaces with micro-data, coordinates, rotating crosshairs, and progress rings to sell the 'Iron Man HUD' illusion."
+  },
+  "motion": {
+    "reactor_spin": "Multiple concentric SVG rings rotating at different speeds, alternating clockwise and counter-clockwise.",
+    "pulse": "Smooth opacity pulsing (0.4 to 1.0) on the cyan core to simulate 'breathing' AI.",
+    "data_stream": "Fast text scrambling on load before settling into readable words.",
+    "hover": "Elements don't lift; they increase their text-shadow/glow intensity and switch from Cyan to Solid White or Amber."
+  },
+  "components": {
+    "modals_and_overlays": "CRITICAL: NO TRANSPARENT BACKGROUNDS for content surfaces. Use bg-black/90 backdrop-blur-xl border border-cyan-500/30. Ensure text is 100% readable over the complex background.",
+    "buttons": "Terminal style. Transparent background, 1px solid cyan border, uppercase cyan text. On hover: bg-cyan-500/20 text-white shadow-[0_0_15px_#00F0FF].",
+    "inputs": "Border-bottom only (border-cyan-500), bg-transparent, monospace font, blinking block cursor.",
+    "second_brain_graph": "Render using react-force-graph-2d. Nodes must be glowing cyan (standard) and amber (focused). Links must be glowing semi-transparent lines."
+  },
+  "instructions_to_main_agent": {
+    "step_1": "Setup global CSS for Scanlines, Grid Background, and Glowing utility classes.",
+    "step_2": "Build the Central Reactor component using concentric absolute-positioned SVGs with framer-motion rotations.",
+    "step_3": "Build the HUD Layout: Left Rail (Logs/Graph), Center (Reactor/Voice), Right Rail (Commands/Notes).",
+    "step_4": "Implement the Second Brain visual graph with react-force-graph-2d.",
+    "step_5": "Skin all Shadcn components (Dialog, Input) to strip their SaaS look entirely, replacing it with the HUD Bracket/Terminal aesthetic.",
+    "critical_note": "This is a single-screen dashboard. Use raw HTML/Tailwind for the grid to maintain strict absolute/relative positioning. Avoid standard flexbox document flow where possible to maintain the camera HUD illusion. Work in .js files, NOT .tsx."
+  },
+  "accessibility": {
+    "contrast": "Maintain high contrast for readable data by using white or bright cyan text against the void black background.",
+    "animations": "Respect prefers-reduced-motion for the spinning reactor rings."
+  },
+  "testing_attributes": {
+    "requirement": "All interactive and key informational elements MUST include a data-testid attribute. Use kebab-case, role-based names (e.g., data-testid='reactor-activate-btn')."
+  },
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling. Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur), but NEVER purely transparent content surfaces.",
+    "You MUST NOT apply universal transition. Eg: transition: all. Always add transitions for specific interactive elements.",
+    "You MUST NOT center align the app container. Do not add .App { text-align: center; }.",
+    "Always use modern button styles (in this case, terminal/HUD style) with interaction animations & color relevant to the app style.",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons. Use technical SVG icons from lucide-react or phosphor.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations separate good from extraordinary.",
+    "Prioritize using pre-existing components from src/components/ui when applicable, but heavily customize them for the HUD look.",
+    "Use sonner for toasts, located in /app/src/components/ui/sonner.js."
+  ]
+}
