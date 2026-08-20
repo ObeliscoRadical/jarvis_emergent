@@ -83,7 +83,7 @@ function ActivationScreen({ onActivate }) {
       exit={{ opacity: 0, scale: 0.98 }}
     >
       <div className="activation-orb-shadow" />
-      <span className="phase-chip" data-testid="activation-chip">IRON CORE PROTOCOL : PRODUZIDO POR CEO AI</span>
+      <span className="phase-chip" data-testid="activation-chip">PRODUZIDO POR CEO AI</span>
       <h1 className="phase-title" data-testid="activation-assistant-name">{CONFIG.name}</h1>
       <p className="activation-copy" data-testid="activation-copy">
         Sala de comando pessoal com presença cinematográfica, núcleo vivo e memória estratégica visual.
