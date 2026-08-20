@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -144,8 +144,13 @@ function DataColumn({ title, items, testId }) {
 
 function App() {
   const initialStorage = useMemo(() => getStoredNotes(), []);
+  const speechUtteranceRef = useRef(null);
+  const speechAnimationTimerRef = useRef(null);
+  const voicesRef = useRef([]);
   const [phase, setPhase] = useState("boot");
   const [orbState, setOrbState] = useState("idle");
+  const [speechPulse, setSpeechPulse] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(() => Boolean(document.fullscreenElement));
   const [notes, setNotes] = useState(initialStorage.notes);
   const [apiKey, setApiKey] = useState(() => window.localStorage.getItem(STORAGE_KEYS.key) || "");
   const [input, setInput] = useState("");
@@ -180,8 +185,135 @@ function App() {
     [notes.length, orbState],
   );
 
+  const pickPortugueseVoice = () => {
+    const voices = voicesRef.current;
+    const ptVoices = voices.filter((voice) => voice.lang?.toLowerCase().startsWith("pt-br") || voice.lang?.toLowerCase().startsWith("pt"));
+    return ptVoices[0] || voices[0] || null;
+  };
+
+  const simulateSpeechMotion = (text, nextState = "listening") => {
+    window.clearInterval(speechAnimationTimerRef.current);
+    setOrbState("speaking");
+    setSpeechPulse(1);
+
+    const estimatedWords = Math.max(text.trim().split(/\s+/).length, 4);
+    let tick = 0;
+    speechAnimationTimerRef.current = window.setInterval(() => {
+      tick += 1;
+      setSpeechPulse((tick % 5) + 1);
+    }, 120);
+
+    window.setTimeout(() => {
+      window.clearInterval(speechAnimationTimerRef.current);
+      setSpeechPulse(0);
+      setOrbState(nextState);
+    }, Math.min(Math.max(estimatedWords * 180, 900), 3200));
+  };
+
+  const speakText = (text, nextState = "listening") => {
+    if (!text?.trim()) {
+      return;
+    }
+
+    if (!("speechSynthesis" in window)) {
+      simulateSpeechMotion(text, nextState);
+      return;
+    }
+
+    window.speechSynthesis?.cancel();
+    window.clearInterval(speechAnimationTimerRef.current);
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = pickPortugueseVoice();
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else {
+      utterance.lang = "pt-BR";
+    }
+
+    utterance.rate = 1;
+    utterance.pitch = CONFIG.voiceGender === "masculina" ? 0.9 : 1.05;
+    utterance.onstart = () => {
+      setOrbState("speaking");
+      setSpeechPulse(1);
+    };
+    utterance.onboundary = (event) => {
+      if (event.name === "word" || typeof event.charIndex === "number") {
+        setSpeechPulse((event.charIndex % 5) + 1);
+      }
+    };
+    utterance.onend = () => {
+      setSpeechPulse(0);
+      setOrbState(nextState);
+      speechUtteranceRef.current = null;
+    };
+    utterance.onerror = () => {
+      setSpeechPulse(0);
+      setOrbState(nextState);
+      speechUtteranceRef.current = null;
+      simulateSpeechMotion(text, nextState);
+    };
+
+    speechUtteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const requestFullscreenMode = async () => {
+    if (!document.documentElement.requestFullscreen || document.fullscreenElement) {
+      return;
+    }
+
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch {
+      toast("O navegador bloqueou o fullscreen automático.");
+    }
+  };
+
+  const toggleFullscreenMode = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await requestFullscreenMode();
+      }
+    } catch {
+      toast.error("Não consegui alternar o modo tela cheia.");
+    }
+  };
+
   const latestUser = [...messages].reverse().find((message) => message.role === "user")?.text || "Aguardando comando...";
   const latestAssistant = [...messages].reverse().find((message) => message.role === "assistant")?.text || "Prévia pronta.";
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) {
+      return undefined;
+    }
+
+    const syncVoices = () => {
+      voicesRef.current = window.speechSynthesis.getVoices();
+    };
+
+    syncVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", syncVoices);
+
+    return () => {
+      window.speechSynthesis?.cancel();
+      window.clearInterval(speechAnimationTimerRef.current);
+      window.speechSynthesis.removeEventListener?.("voiceschanged", syncVoices);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -205,19 +337,6 @@ function App() {
     window.localStorage.setItem(STORAGE_KEYS.key, apiKey);
   }, [apiKey]);
 
-  useEffect(() => {
-    if (phase !== "hud") {
-      return undefined;
-    }
-
-    const thinkingTimer = window.setTimeout(() => setOrbState("speaking"), 900);
-    const speakingTimer = window.setTimeout(() => setOrbState("listening"), 1800);
-
-    return () => {
-      window.clearTimeout(thinkingTimer);
-      window.clearTimeout(speakingTimer);
-    };
-  }, [phase]);
 
   const openNoteDialog = (noteId) => {
     if (noteId) {
@@ -270,17 +389,31 @@ function App() {
     toast.success("Prévia restaurada ao estado original.");
   };
 
-  const handleActivation = () => {
+  const handleActivation = async () => {
+    await requestFullscreenMode();
     setPhase("hud");
     setOrbState("thinking");
-    setMessages((current) => [...current, { role: "assistant", text: `Sistemas online. Estou ouvindo, ${CONFIG.address}.` }]);
+    const greeting = `Sistemas online. Estou ouvindo, ${CONFIG.address}.`;
+    setMessages((current) => [...current, { role: "assistant", text: greeting }]);
+    window.setTimeout(() => speakText(greeting, "listening"), 180);
   };
 
   const toggleListening = () => {
+    if (orbState === "speaking") {
+      window.speechSynthesis?.cancel();
+      window.clearInterval(speechAnimationTimerRef.current);
+      setSpeechPulse(0);
+      setOrbState("idle");
+      return;
+    }
+
     setOrbState((current) => (current === "listening" ? "idle" : "listening"));
   };
 
   const stopSpeaking = () => {
+    window.speechSynthesis?.cancel();
+    window.clearInterval(speechAnimationTimerRef.current);
+    setSpeechPulse(0);
     setOrbState("idle");
     toast("Fala simulada interrompida.");
   };
@@ -299,18 +432,17 @@ function App() {
     window.setTimeout(() => {
       const response = sampleResponse(trimmed, notes);
       setMessages((current) => [...current, { role: "assistant", text: response }]);
-      setOrbState("speaking");
-      window.setTimeout(() => setOrbState("listening"), 1200);
+      speakText(response, "listening");
     }, 900);
   };
 
   return (
-    <div className="jarvis-cinematic-shell" data-testid="jarvis-preview-shell">
+    <div className={`jarvis-cinematic-shell ${isFullscreen ? "immersive-fullscreen" : ""}`} data-testid="jarvis-preview-shell">
       <div className="ambient-layer ambient-blue" />
       <div className="ambient-layer ambient-amber" />
       <div className="shell-grid-overlay" />
       <div className="scanline-overlay" />
-      <Toaster position="bottom-right" theme="dark" richColors />
+      <Toaster position="bottom-left" theme="dark" richColors />
 
       <AnimatePresence mode="wait">
         {phase === "boot" ? <BootScreen /> : null}
@@ -354,7 +486,18 @@ function App() {
                   className="jarvis-input stage-key-input"
                   data-testid="anthropic-key-input"
                 />
-                <span className="stage-preview-badge" data-testid="preview-badge">Prévia sem Claude ativo</span>
+                <div className="stage-console-actions">
+                  <span className="stage-preview-badge" data-testid="preview-badge">Prévia sem Claude ativo</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="jarvis-button-secondary fullscreen-toggle-button"
+                    data-testid="fullscreen-toggle-button"
+                    onClick={toggleFullscreenMode}
+                  >
+                    {isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+                  </Button>
+                </div>
               </div>
             </header>
 
@@ -436,7 +579,7 @@ function App() {
                   ))}
                 </div>
 
-                <ReactorOrb state={orbState} onToggleListening={toggleListening} />
+                <ReactorOrb state={orbState} speechPulse={speechPulse} onToggleListening={toggleListening} />
               </div>
 
               <div className="stage-stats-row">

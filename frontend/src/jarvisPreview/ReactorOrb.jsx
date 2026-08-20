@@ -3,7 +3,11 @@ import { ORB_LABELS } from "@/jarvisPreview/constants";
 
 const FACE_IMAGE_URL = "https://customer-assets-eiarnc6j.emergentagent.net/job_voice-jarvis-app-32/artifacts/257t0vfc_rosto%20virtual%20a%20falar%20como%20uma%20personalidade%20robotica%20IA%20-%20Pesquisa%20Google.png";
 
-export function ReactorOrb({ state, onToggleListening }) {
+export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
+  const mouthScaleY = state === "speaking" ? 0.76 + speechPulse * 0.08 : state === "listening" ? 0.92 : 0.78;
+  const mouthScaleX = state === "speaking" ? 1 + speechPulse * 0.03 : 1;
+  const mouthOpacity = state === "speaking" ? 0.4 + speechPulse * 0.08 : 0.2;
+
   return (
     <button
       type="button"
@@ -49,6 +53,20 @@ export function ReactorOrb({ state, onToggleListening }) {
             <span className="orbital-eye-glow orbital-eye-left" />
             <span className="orbital-eye-glow orbital-eye-right" />
             <span className="orbital-face-scan" />
+            <span
+              className="orbital-mouth-glow"
+              style={{
+                opacity: mouthOpacity,
+                transform: `translateX(-50%) scaleX(${mouthScaleX}) scaleY(${mouthScaleY})`,
+              }}
+            />
+            <span
+              className="orbital-mouth-line"
+              style={{
+                opacity: state === "speaking" ? 0.8 : 0.38,
+                transform: `translateX(-50%) scaleX(${mouthScaleX}) scaleY(${mouthScaleY})`,
+              }}
+            />
           </span>
         </span>
       </motion.span>

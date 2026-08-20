@@ -1,0 +1,37 @@
+{
+  "summary": "Frontend-only regression + new-feature validation for the Jarvis HUD (native speech + auto fullscreen). All 9 requested features PASS end-to-end at 1920x1080 against the deployed preview URL. Boot -> Activation -> HUD auto-transitions. Clicking ATIVAR SISTEMA now (a) auto-enters fullscreen (document.fullscreenElement becomes truthy and shell gets 'immersive-fullscreen' class) AND (b) opens the HUD with greeting flow. Dedicated 'Tela cheia / Sair da tela cheia' button is present with correct dynamic label. Activation greeting 'Sistemas online. Estou ouvindo, senhor.' is pushed to conversation log and drives the orb through thinking -> speaking -> listening states with mouth/face transforms changing (scaleX/scaleY/opacity animate on .orbital-mouth-line and .orbital-mouth-glow), so the graceful fallback + real TTS pipeline both animate the face correctly. Send-command still produces a mocked assistant response, orb transitions to 'Emitindo resposta' (speaking), and 'Parar fala' resets orb to 'Pronto em espera' and cancels animation timers. Mic button toggles listening/idle, ReactorOrb click flips state. Note graph regression: brain node click opens node-editor-modal, cancel closes it, reset button remains visible. Zero console errors and zero pageerrors during full flow. Claude API and TTS remain MOCKED per request (browser-native speechSynthesis is the current voice source with a visual-only fallback).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Main HUD - reactor core", "issues": ["Carried from iter_2: the 'CENTRAL CORE / ESCUTA ATIVA' caption still overlaps the reactor-bottom-spectrum bars, hurting readability. Consider adding a subtle backdrop or shifting the caption above the spectrum."]},
+      {"screen": "Main HUD - right rail", "issues": ["Carried from iter_1/iter_2: SecondBrain legend + 'contexto injetado' pill continue to sit just under the visible fold at 1080p; tightening brain-panel spacing would keep them in-frame."]},
+      {"screen": "Toaster overlay", "issues": ["The bottom-right sonner toast ('Fala simulada interrompida.') briefly overlays the SecondBrain legend/reset area. Non-blocking, but could be offset a few px to keep the brain panel clean while a toast is active."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional polish: reposition or add a background to the 'CENTRAL CORE' caption so it doesn't sit on top of the spectrum bars.",
+    "Optional polish: tighten brain-panel vertical spacing so the legend and 'contexto injetado' pill remain above the fold at 1080p.",
+    "Optional: increase sonner offset (or use top-right in-HUD) so toasts don't cover the SecondBrain legend."
+  ],
+  "critical_code_review_comments": [
+    "App.js is now ~695 lines including the new speech + fullscreen logic; still just under the 700-line guideline. Extracting speakText / simulateSpeechMotion / requestFullscreenMode into a /hooks/useJarvisVoice.js and /hooks/useFullscreen.js would keep this under budget and simplify testing when Claude/STT come online.",
+    "speakText selects a Portuguese voice via voicesRef.current only if voices are already loaded; on some browsers voices are populated asynchronously via 'voiceschanged'. Fallback to utterance.lang = 'pt-BR' when no voice is picked is correct, but consider re-attempting voice selection on first speak if voicesRef is empty.",
+    "sendCommand and handleActivation use bare window.setTimeout without capturing IDs for cleanup; if a phase ever unmounts mid-response the setState will fire on an unmounted tree. Low risk today (single-phase preview), but worth adding a ref-based cleanup once phases are reversible.",
+    "toggleListening cancels speechSynthesis when orbState is 'speaking' but does not fully mirror stopSpeaking's toast; behaviour is fine, but consider unifying via a single stopSpeech() helper to avoid drift.",
+    "requestFullscreenMode swallows a possible rejection with a plain toast('...'); if the user has fullscreen permanently blocked, they will see the toast every activation. Consider a session flag to only warn once."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100%"},
+  "test_credentials": "none required",
+  "seed_data_creation": "none - preview uses in-memory + localStorage defaults",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "New behaviour delta vs iter_2: (1) handleActivation now awaits requestFullscreenMode() then setPhase('hud') and calls speakText(greeting, 'listening'); (2) new fullscreen-toggle-button data-testid in the api-key panel with dynamic label 'Tela cheia' / 'Sair da tela cheia'; (3) stop-speaking-button now cancels both real speechSynthesis and the simulate timer; (4) ReactorOrb receives speechPulse and animates .orbital-mouth-line / .orbital-mouth-glow via style transforms (not CSS classes). NOTE: in Playwright/Chromium headless, document.exitFullscreen() often does not actually clear document.fullscreenElement even though the call executes without error; toggling the fullscreen button 'looks' broken in automation but works in real browsers. Do NOT flag this as a bug based only on Playwright behavior. Claude, STT, and TTS remain MOCKED (browser-native speechSynthesis is used when available; when unavailable, simulateSpeechMotion animates the face). When Claude wiring lands, load ai-testing-core + ai-testing-llm skills; when real STT/TTS lands, add ai-testing-audio.",
+  "rca of the issue": "N/A - no bugs found. Speech + fullscreen additions integrate cleanly with existing HUD."
+}
