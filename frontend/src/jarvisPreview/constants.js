@@ -1,9 +1,9 @@
 export const CONFIG = {
-  name: "Jarvis",
+  name: "JARVAS",
   address: "senhor",
   themeColor: "azul reator",
   persona: "formal britânico",
-  wakeWord: "ei jarvis",
+  wakeWord: "ei jarvas",
   voiceGender: "masculina",
 };
 
@@ -23,7 +23,7 @@ export const DEFAULT_NOTES = [
     id: "meta-ceo",
     area: "metas",
     title: "CEO IA",
-    body: "Transformar este Jarvis em um conselheiro executivo pessoal, estratégico e presente no dia a dia.",
+    body: "Transformar este JARVAS em um conselheiro executivo pessoal, estratégico e presente no dia a dia.",
   },
   {
     id: "work-command",

@@ -158,7 +158,7 @@ function App() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorNote, setEditorNote] = useState(null);
   const [messages, setMessages] = useState([
-    { role: "user", text: "Quero ver uma versão cinematográfica do meu Jarvis CEO." },
+    { role: "user", text: "Quero ver uma versão cinematográfica do meu JARVAS CEO." },
     {
       role: "assistant",
       text: "Cena pronta, senhor. Agora o sistema assume uma HUD técnica densa, com núcleo dominante e painéis em estilo Stark.",
@@ -653,7 +653,7 @@ function App() {
                   placeholder="ou digite e tecle Enter"
                   className="jarvis-input command-input"
                   data-testid="chat-input"
-                  aria-label="Digite um comando para o Jarvis"
+                  aria-label="Digite um comando para o JARVAS"
                 />
 
                 <div className="command-actions">

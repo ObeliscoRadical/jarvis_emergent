@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ORB_LABELS } from "@/jarvisPreview/constants";
 
-const FACE_IMAGE_URL = "https://static.prod-images.emergentagent.com/jobs/b341e959-5ed6-4bf7-b7d3-7fbbb183998c/images/42cb97d77458e0789c39ab52c049fa35e8c4e659d308f78d7c5a6a880fdaadc1.jpeg";
+const FACE_IMAGE_URL = "https://static.prod-images.emergentagent.com/jobs/b341e959-5ed6-4bf7-b7d3-7fbbb183998c/images/775a77bb70fb58af6707372d2a592dfacf9128882a8f54e25c12128344c6e6bf.jpeg";
 
 export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
   const mouthScaleY = state === "speaking" ? 0.76 + speechPulse * 0.08 : state === "listening" ? 0.92 : 0.78;
@@ -45,7 +45,7 @@ export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
           <span className="orbital-face-frame">
             <img
               src={FACE_IMAGE_URL}
-              alt="Avatar holográfico do Jarvis"
+              alt="Avatar holográfico do JARVAS"
               className="orbital-face-image"
               data-testid="reactor-face-image"
             />
