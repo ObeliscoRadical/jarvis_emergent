@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ORB_LABELS } from "@/jarvisPreview/constants";
 
-const FACE_IMAGE_URL = "https://customer-assets-eiarnc6j.emergentagent.net/job_voice-jarvis-app-32/artifacts/257t0vfc_rosto%20virtual%20a%20falar%20como%20uma%20personalidade%20robotica%20IA%20-%20Pesquisa%20Google.png";
+const FACE_IMAGE_URL = "https://static.prod-images.emergentagent.com/jobs/b341e959-5ed6-4bf7-b7d3-7fbbb183998c/images/42cb97d77458e0789c39ab52c049fa35e8c4e659d308f78d7c5a6a880fdaadc1.jpeg";
 
 export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
   const mouthScaleY = state === "speaking" ? 0.76 + speechPulse * 0.08 : state === "listening" ? 0.92 : 0.78;
@@ -50,8 +50,6 @@ export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
               data-testid="reactor-face-image"
             />
             <span className="orbital-face-overlay" />
-            <span className="orbital-eye-glow orbital-eye-left" />
-            <span className="orbital-eye-glow orbital-eye-right" />
             <span className="orbital-face-scan" />
             <span
               className="orbital-mouth-glow"

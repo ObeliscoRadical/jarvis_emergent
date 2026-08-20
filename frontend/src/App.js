@@ -438,8 +438,11 @@ function App() {
 
   return (
     <div className={`jarvis-cinematic-shell ${isFullscreen ? "immersive-fullscreen" : ""}`} data-testid="jarvis-preview-shell">
+      <div className="cinematic-backdrop-image" />
       <div className="ambient-layer ambient-blue" />
       <div className="ambient-layer ambient-amber" />
+      <div className="ambient-layer ambient-volume" />
+      <div className="ambient-layer ambient-vignette" />
       <div className="shell-grid-overlay" />
       <div className="scanline-overlay" />
       <Toaster position="bottom-left" theme="dark" richColors />
@@ -543,6 +546,8 @@ function App() {
 
             <section className="stage-core" data-testid="orb-panel">
               <div className="center-guides" />
+              <div className="reactor-stage-aura" />
+              <div className="reactor-stage-floor" />
               <div className="stage-core-copy">
                 <p className="core-kicker" data-testid="orb-kicker">PRIMARY REACTOR</p>
                 <h2 className="core-title" data-testid="orb-title">Núcleo de presença do {CONFIG.name}</h2>
