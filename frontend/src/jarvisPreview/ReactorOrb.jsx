@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ORB_LABELS } from "@/jarvisPreview/constants";
 
-const FACE_IMAGE_URL = "https://static.prod-images.emergentagent.com/jobs/b341e959-5ed6-4bf7-b7d3-7fbbb183998c/images/775a77bb70fb58af6707372d2a592dfacf9128882a8f54e25c12128344c6e6bf.jpeg";
+const FACE_IMAGE_URL = "https://static.prod-images.emergentagent.com/jobs/b341e959-5ed6-4bf7-b7d3-7fbbb183998c/images/7859dbf804ad2a3f0351347b1579990c59fc74e8d4537585497b7d93a6f91db8.jpeg";
 
 export function ReactorOrb({ state, speechPulse = 0, onToggleListening }) {
   const mouthScaleY = state === "speaking" ? 0.76 + speechPulse * 0.08 : state === "listening" ? 0.92 : 0.78;
